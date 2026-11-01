@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DuoQ Challenge</title>
+<style>
+  /* --- Couleurs et texte ------------------------------------------------------
+     Une interface neutre : la seule couleur vive vient des paliers des joueurs. */
+  :root {
+    --fond: #f1f3f5;
+    --surface: #ffffff;
+    --encre: #1b2530;
+    --discret: #5e6b78;
+    --filet: #d3d9df;
+    --victoire: #2d7a55;
+    --defaite: #b04a3f;
+    --remake: #7d848c;
+
+    /* Couleurs des paliers (choix libres, proches de l'usage courant). */
+    --IRON: #6e6a68;  --BRONZE: #9c6a45;  --SILVER: #8a96a1;  --GOLD: #c09424;
+    --PLATINUM: #2f9693; --EMERALD: #2b9a5e; --DIAMOND: #5677d1; --MASTER: #9558c0;
+    --GRANDMASTER: #c2453f; --CHALLENGER: #d4ac3c;  --AUCUN: #c4cbd2;
+
+    --police: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fond);
+    color: var(--encre);
+    font: 1rem/1.5 var(--police);
+    font-variant-numeric: tabular-nums;   /* chiffres de même largeur : colonnes alignées */
+  }
+  main { max-width: 44rem; margin: 0 auto; padding: 2rem 1rem 3rem; }
+  h1, h2, h3 { line-height: 1.15; margin: 0; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--DIAMOND); outline-offset: 2px; }
+
+  /* --- En-tête -------------------------------------------------------------- */
+  .entete h1 { font-size: clamp(2rem, 7vw, 2.8rem); font-weight: 800; letter-spacing: -0.02em; }
+  .entete p { margin: 0.35rem 0 0; color: var(--discret); }
+  .entete .etat { color: var(--encre); font-weight: 600; }
+
+  /* --- Classement : une ligne par équipe ------------------------------------
+     La bande verticale à gauche montre le palier actuel des deux joueurs. */
+  .classement { list-style: none; margin: 2rem 0 0; padding: 0; }
+  .ligne {
+    display: grid;
+    grid-template-columns: 0.6rem 2.2rem 1fr auto;
+    align-items: center;
+    gap: 0 0.9rem;
+    background: var(--surface);
+    border-radius: 0.5rem;
+    margin-bottom: 0.6rem;
+    overflow: hidden;
+    text-decoration: none;
+  }
+  .ligne:hover .nom { text-decoration: underline; }
+  .bande { align-self: stretch; display: grid; grid-template-rows: 1fr 1fr; }
+  .position { font-size: 1.6rem; font-weight: 800; color: var(--discret); text-align: center; }
+  .ligne:first-child .position { color: var(--encre); }
+  .milieu { padding: 0.85rem 0; min-width: 0; }
+  .nom { font-weight: 700; font-size: 1.1rem; }
+  .sous { color: var(--discret); font-size: 0.875rem; }
+  .jauge { height: 0.3rem; background: var(--fond); border-radius: 1rem; margin-top: 0.45rem; }
+  .jauge span { display: block; height: 100%; background: var(--encre); border-radius: 1rem; }
+  .score { padding-right: 1rem; text-align: right; font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; }
+  .score small { display: block; font-size: 0.75rem; font-weight: 400; color: var(--discret); letter-spacing: 0; }
+
+  /* --- Fiche d'une équipe -------------------------------------------------- */
+  .equipe { margin-top: 2.75rem; }
+  .equipe h2 { font-size: 1.5rem; font-weight: 800; }
+  .equipe h2 + p { margin: 0.2rem 0 1rem; color: var(--discret); }
+
+  .joueur {
+    display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 1rem;
+    padding: 0.75rem 0; border-top: 1px solid var(--filet);
+  }
+  .joueur .id { font-weight: 600; overflow-wrap: anywhere; }
+  .joueur .pts { text-align: right; font-weight: 700; }
+  .joueur .rangs { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; font-size: 0.9rem; }
+  .palier {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.05rem 0.5rem 0.05rem 0.4rem; border-radius: 1rem;
+    background: var(--surface); border: 1px solid var(--filet);
+  }
+  .palier::before { content: ""; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--teinte, var(--AUCUN)); }
+  .detail-pts { grid-column: 1 / -1; color: var(--discret); font-size: 0.85rem; }
+
+  .bilan { display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; padding: 0.75rem 0; border-top: 1px solid var(--filet); border-bottom: 1px solid var(--filet); }
+  .bilan b { font-weight: 700; }
+
+  .alertes { margin: 1rem 0 0; padding: 0.75rem 1rem; background: var(--surface); border-left: 4px solid var(--defaite); border-radius: 0 0.4rem 0.4rem 0; }
+  .alertes h3 { font-size: 1rem; margin-bottom: 0.35rem; }
+  .alertes ul { margin: 0; padding-left: 1.1rem; }
+
+  details { margin-top: 1rem; }
+  summary { cursor: pointer; font-weight: 600; padding: 0.4rem 0; }
+  .parties { list-style: none; margin: 0.25rem 0 0; padding: 0; }
+  .parties li {
+    display: grid; grid-template-columns: 8.2rem 5.2rem 1fr; gap: 0 0.75rem;
+    padding: 0.45rem 0; border-top: 1px solid var(--filet); font-size: 0.9rem;
+  }
+  .parties .date { color: var(--discret); }
+  .parties .Victoire { color: var(--victoire); font-weight: 700; }
+  .parties .Défaite { color: var(--defaite); font-weight: 700; }
+  .parties .Remake { color: var(--remake); font-weight: 700; }
+  .parties .signal { grid-column: 2 / -1; color: var(--defaite); font-size: 0.85rem; }
+  .parties .exclue { opacity: 0.6; }
+
+  /* --- Pied de page --------------------------------------------------------- */
+  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--filet); color: var(--discret); font-size: 0.875rem; }
+  footer h2 { font-size: 1rem; color: var(--encre); margin-bottom: 0.4rem; }
+  footer ul { margin: 0 0 1rem; padding-left: 1.1rem; }
+
+  .erreur { margin-top: 2rem; padding: 1rem; background: var(--surface); border-left: 4px solid var(--defaite); }
+
+  @media (max-width: 30rem) {
+    .ligne { grid-template-columns: 0.5rem 1.6rem 1fr auto; gap: 0 0.6rem; }
+    .score { font-size: 1.5rem; }
+    .parties li { grid-template-columns: 8.2rem 1fr; }
+    .parties .champ { grid-column: 2; }
+    .parties .signal { grid-column: 2; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="entete">
+    <h1 id="titre">DuoQ Challenge</h1>
+    <p id="dates"></p>
+    <p id="etat" class="etat"></p>
+  </header>
+
+  <ol id="classement" class="classement" aria-label="Classement des équipes"></ol>
+  <div id="equipes"></div>
+
+  <footer>
+    <h2>Règles</h2>
+    <ul id="regles"></ul>
+    <p>Ce site n'est ni approuvé ni soutenu par Riot Games et ne reflète pas les opinions
+      de Riot Games ni de quiconque officiellement impliqué dans la production ou la gestion
+      de ses propriétés. Riot Games et toutes les propriétés associées sont des marques
+      commerciales ou déposées de Riot Games, Inc.</p>
+  </footer>
+</main>
+
+<script>
+// Noms français des paliers renvoyés par l'API Riot.
+const NOMS = { IRON: "Fer", BRONZE: "Bronze", SILVER: "Argent", GOLD: "Or", PLATINUM: "Platine",
+  EMERALD: "Émeraude", DIAMOND: "Diamant", MASTER: "Maître", GRANDMASTER: "Grand Maître",
+  CHALLENGER: "Challenger" };
+
+// Petit utilitaire : crée un élément HTML avec une classe et un texte.
+// On utilise textContent (jamais innerHTML) : un pseudo étrange ne peut pas casser la page.
+function el(balise, classe, texte) {
+  const e = document.createElement(balise);
+  if (classe) e.className = classe;
+  if (texte !== undefined) e.textContent = texte;
+  return e;
+}
+
+const signe = n => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n);
+const datePartie = iso => new Date(iso).toLocaleString("fr-FR",
+  { weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+const dateCourte = iso => new Date(iso).toLocaleString("fr-FR",
+  { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
+function ilYa(iso) {
+  if (!iso) return "aucun relevé pour l'instant";
+  const minutes = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (minutes < 1) return "dernier relevé à l'instant";
+  if (minutes < 60) return `dernier relevé il y a ${minutes} min`;
+  return `dernier relevé le ${dateCourte(iso)}`;
+}
+
+function pastille(palier, texte) {
+  const p = el("span", "palier", texte);
+  p.style.setProperty("--teinte", `var(--${palier || "AUCUN"})`);
+  return p;
+}
+
+function afficher(d) {
+  document.getElementById("titre").textContent = d.challenge;
+  document.title = d.challenge;
+  document.getElementById("dates").textContent =
+    `Du ${dateCourte(d.debut)} au ${dateCourte(d.fin)}`;
+
+  const maintenant = new Date(), debut = new Date(d.debut), fin = new Date(d.fin);
+  const phase = maintenant < debut ? "Le challenge n'a pas commencé"
+              : maintenant > fin ? "Challenge terminé"
+              : "Challenge en cours";
+  document.getElementById("etat").textContent = `${phase}, ${ilYa(d.dernier_releve)}.`;
+
+  // Classement
+  const liste = document.getElementById("classement");
+  d.equipes.forEach((e, i) => {
+    const li = el("li");
+    const a = el("a", "ligne");
+    a.href = `#equipe-${i}`;
+
+    const bande = el("span", "bande");
+    bande.setAttribute("aria-hidden", "true");
+    e.joueurs.forEach(j => {
+      const s = el("span");
+      s.style.background = `var(--${j.palier_actuel || "AUCUN"})`;
+      bande.append(s);
+    });
+
+    const milieu = el("span", "milieu");
+    milieu.append(el("span", "nom", e.nom), el("br"),
+      el("span", "sous", `${e.parties_jouees} / ${d.regles.parties_max} parties`));
+    const jauge = el("span", "jauge");
+    const rempli = el("span");
+    rempli.style.width = `${Math.min(100, 100 * e.parties_jouees / d.regles.parties_max)}%`;
+    jauge.append(rempli);
+    milieu.append(jauge);
+
+    const score = el("span", "score", e.score);
+    score.append(el("small", "", "points"));
+
+    a.append(bande, el("span", "position", i + 1), milieu, score);
+    li.append(a);
+    liste.append(li);
+  });
+
+  // Fiches des équipes
+  const zone = document.getElementById("equipes");
+  d.equipes.forEach((e, i) => {
+    const s = el("section", "equipe");
+    s.id = `equipe-${i}`;
+    s.append(el("h2", "", `${i + 1}. ${e.nom}`),
+             el("p", "", `${e.score} points, ${e.parties_restantes} parties restantes`));
+
+    e.joueurs.forEach(j => {
+      const b = el("div", "joueur");
+      const pts = j.points_lp + j.bonus_paliers;
+      b.append(el("span", "id", j.joueur), el("span", "pts", `${signe(pts)} pts`));
+      const rangs = el("span", "rangs");
+      rangs.append(pastille(j.palier_depart, j.rang_depart), el("span", "", "→"),
+                   pastille(j.palier_actuel, j.rang_actuel));
+      b.append(rangs, el("span", "detail-pts",
+        `${signe(j.points_lp)} LP, ${signe(j.bonus_paliers)} de bonus de paliers`));
+      s.append(b);
+    });
+
+    const bilan = el("div", "bilan");
+    const ligneBilan = (libelle, valeur) => {
+      const p = el("span", "", `${libelle} `);
+      p.append(el("b", "", valeur));
+      return p;
+    };
+    bilan.append(ligneBilan("Plus longue série :", `${e.meilleure_serie} victoire${e.meilleure_serie > 1 ? "s" : ""}`),
+                 ligneBilan("Bonus de série :", signe(e.bonus_serie)));
+    e.ajustements.forEach(a => bilan.append(ligneBilan(`Ajustement (${a.motif}) :`, signe(a.points))));
+    s.append(bilan);
+
+    if (e.alertes.length) {
+      const box = el("div", "alertes");
+      box.append(el("h3", "", "À vérifier"));
+      const ul = el("ul");
+      e.alertes.forEach(t => ul.append(el("li", "", t)));
+      box.append(ul);
+      s.append(box);
+    }
+
+    const det = el("details");
+    det.append(el("summary", "", `Parties (${e.parties.length})`));
+    const ul = el("ul", "parties");
+    [...e.parties].reverse().forEach(p => {          // les plus récentes en premier
+      const li = el("li", p.comptee || p.resultat === "Remake" ? "" : "exclue");
+      li.append(el("span", "date", datePartie(p.date)),
+                el("span", p.resultat, p.resultat),
+                el("span", "champ", Object.values(p.champions).join(" et ")));
+      p.signalements.forEach(t => li.append(el("span", "signal", t)));
+      ul.append(li);
+    });
+    if (!e.parties.length) ul.append(el("li", "", "Aucune partie pour l'instant."));
+    det.append(ul);
+    s.append(det);
+    zone.append(s);
+  });
+
+  // Règles (lues dans classement.json, donc toujours à jour avec config.toml)
+  const r = d.regles, regles = document.getElementById("regles");
+  const paliers = Object.entries(r.paliers).map(([p, v]) => `${NOMS[p]} ${v}`).join(", ");
+  [`Chaque LP gagné ou perdu vaut un point ; les points des deux joueurs s'additionnent.`,
+   `Bonus de palier atteint : ${paliers}. Il est perdu si l'on redescend.`,
+   `Plus longue série de victoires : ${r.serie_par_joueur} points pour chaque joueur de l'équipe.`,
+   `${r.parties_max} parties au maximum par équipe ; les remakes ne comptent pas.`,
+   `Parties classées uniquement avec son coéquipier.`]
+    .forEach(t => regles.append(el("li", "", t)));
+}
+
+// Chargement des données. Pour tester un autre fichier : index.html?donnees=classement-test.json
+const fichier = new URLSearchParams(location.search).get("donnees") || "classement.json";
+fetch(fichier, { cache: "no-store" })
+  .then(r => { if (!r.ok) throw new Error(`fichier ${fichier} introuvable (${r.status})`); return r.json(); })
+  .then(afficher)
+  .catch(err => {
+    const m = el("p", "erreur",
+      `Impossible de charger le classement : ${err.message}. ` +
+      `Sur votre ordinateur, ouvrez la page via un serveur local (py -m http.server) plutôt que par un double-clic.`);
+    document.querySelector("main").insertBefore(m, document.getElementById("classement"));
+  });
+</script>
+</body>
+</html>

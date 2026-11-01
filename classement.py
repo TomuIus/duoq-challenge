@@ -51,12 +51,19 @@ def bonus_paliers(depart, final, bonus):
     return sum(bonus.get(p, 0) for p in PALIERS[i_depart + 1:i_final + 1])
 
 
+NOMS_PALIERS = {"IRON": "Fer", "BRONZE": "Bronze", "SILVER": "Argent", "GOLD": "Or",
+                "PLATINUM": "Platine", "EMERALD": "Émeraude", "DIAMOND": "Diamant",
+                "MASTER": "Maître", "GRANDMASTER": "Grand Maître", "CHALLENGER": "Challenger"}
+
+
 def texte_rang(rang):
+    """Rang lisible en français, par exemple « Or II 75 LP »."""
     if rang is None:
         return "non classé"
+    nom = NOMS_PALIERS[rang["palier"]]
     if rang["palier"] in PALIERS_SANS_DIVISION:
-        return f"{rang['palier']} {rang['lp']} LP"
-    return f"{rang['palier']} {rang['division']} {rang['lp']} LP"
+        return f"{nom} {rang['lp']} LP"
+    return f"{nom} {rang['division']} {rang['lp']} LP"
 
 
 # --- Lecture de l'historique ----------------------------------------------------
@@ -178,8 +185,10 @@ def analyser_equipe(equipe, historique, config, debut, fin):
             points_paliers = bonus_paliers(depart, final, config["bonus"]["paliers"])
         total += points_lp + points_paliers
         details.append({"joueur": riot_id, "rang_depart": texte_rang(depart),
-                        "rang_actuel": texte_rang(final), "points_lp": points_lp,
-                        "bonus_paliers": points_paliers})
+                        "rang_actuel": texte_rang(final),
+                        "palier_depart": depart["palier"] if depart else None,
+                        "palier_actuel": final["palier"] if final else None,
+                        "points_lp": points_lp, "bonus_paliers": points_paliers})
 
     # Ajustements manuels saisis dans config.toml (pénalités, corrections).
     ajustements = [a for a in config.get("ajustements", []) if a["equipe"] == equipe["nom"]]
@@ -221,7 +230,12 @@ def main():
                 "calcule_le": datetime.now(PARIS).isoformat(timespec="seconds"),
                 "dernier_releve": historique.get("dernier_releve"),
                 "debut": debut.isoformat(), "fin": fin.isoformat(),
-                "record_serie": record, "equipes": equipes}
+                "record_serie": record,
+                # Rappel des règles, pour que la page les affiche sans lire config.toml.
+                "regles": {"parties_max": config["challenge"]["parties_max"],
+                           "serie_par_joueur": config["bonus"]["serie_par_joueur"],
+                           "paliers": config["bonus"]["paliers"]},
+                "equipes": equipes}
     (dossier / args.sortie).write_text(
         json.dumps(resultat, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
