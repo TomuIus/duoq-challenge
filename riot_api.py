@@ -20,7 +20,8 @@ class RiotAPI:
         #  - « plateforme » (ex. euw1) pour les classements.
         self.url_region = f"https://{region}.api.riotgames.com"
         self.url_plateforme = f"https://{plateforme}.api.riotgames.com"
-        self.cle = os.environ.get("RIOT_API_KEY")
+        # .strip() retire les espaces et retours à la ligne collés par erreur autour de la clé.
+        self.cle = (os.environ.get("RIOT_API_KEY") or "").strip()
         if not self.cle:
             sys.exit("Erreur : la variable d'environnement RIOT_API_KEY n'est pas définie.")
         self.nb_requetes = 0  # pour vérifier qu'on reste loin des limites
