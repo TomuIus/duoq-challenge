@@ -1,0 +1,8 @@
+# Environnement virtuel Python (propre à chaque ordinateur, ne pas envoyer sur GitHub)
+.venv/
+
+# Fichiers temporaires de Python
+__pycache__/
+
+# Au cas où : ne jamais envoyer de fichier contenant une clé
+.env
