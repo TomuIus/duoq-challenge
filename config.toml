@@ -1,0 +1,56 @@
+# =============================================================================
+#  DuoQ Challenge : configuration
+#  Toutes les règles modifiables du challenge sont ici. Après une modification,
+#  vérifiez le fichier avec :  .venv\Scripts\python config.py
+# =============================================================================
+
+[challenge]
+nom = "DuoQ Challenge 2027"
+# Heure de Paris (+01:00 en janvier). Dates provisoires.
+debut = 2027-01-22T00:00:00+01:00
+fin   = 2027-01-29T23:59:00+01:00
+# Nombre maximum de parties par équipe (les remakes ne comptent pas).
+parties_max = 50
+
+[riot]
+# Hypothèse : tous les joueurs sont sur EUW.
+region     = "europe"   # adresses des comptes et des parties
+plateforme = "euw1"     # adresses des classements
+file_id    = 420        # file « Classée Solo/Duo »
+
+[bonus]
+# Bonus de plus longue série de victoires, versé à CHAQUE joueur de l'équipe
+# (donc 2 x 50 = 100 pour l'équipe). En cas d'égalité, chaque équipe le reçoit.
+serie_par_joueur = 50
+# Bonus du joueur le mieux classé : désactivé pour l'instant (0).
+mieux_classe = 0
+
+[bonus.paliers]
+# Points gagnés en atteignant chaque palier pendant le challenge.
+# Le bonus dépend du palier actuel : perdu si l'on redescend, regagné si l'on remonte.
+# Les noms doivent être ceux de l'API Riot (en anglais, en majuscules).
+BRONZE      = 10
+SILVER      = 20
+GOLD        = 30
+PLATINUM    = 40
+EMERALD     = 50
+DIAMOND     = 60   # valeur ajoutée par nous (+10 par palier)
+MASTER      = 70   # idem
+GRANDMASTER = 80   # idem
+CHALLENGER  = 90   # idem
+
+# --- Équipes -----------------------------------------------------------------
+# Riot ID exact de chaque joueur (Pseudo#TAG). Les noms d'équipe sont libres.
+# À COMPLÉTER : coéquipiers et autres équipes (avec l'accord de chacun).
+
+[[equipes]]
+nom = "Équipe 1"
+joueurs = ["Tomulus#ÀCAB", "A_COMPLETER_1#TAG"]
+
+[[equipes]]
+nom = "Équipe 2"
+joueurs = ["A_COMPLETER_2#TAG", "A_COMPLETER_3#TAG"]
+
+[[equipes]]
+nom = "Équipe 3"
+joueurs = ["A_COMPLETER_4#TAG", "A_COMPLETER_5#TAG"]
