@@ -177,6 +177,13 @@ def analyser_equipe(equipe, historique, config, debut, fin):
     for riot_id in joueurs:
         releves = releves_du_joueur(historique, riot_id)
         depart = rang_de_depart(releves, debut)
+        # Rang de départ fixé à la main dans config.toml : il remplace le calcul.
+        fixe = next((r for r in config.get("rangs_depart", [])
+                     if r["joueur"].lower() == riot_id.lower()), None)
+        if fixe:
+            depart = {"palier": fixe["palier"], "division": fixe.get("division", "I"),
+                      "lp": fixe["lp"]}
+            alertes.append(f"{riot_id} : rang de départ fixé à la main ({texte_rang(depart)}).")
         final = rang_final(releves, partie_exclue, alertes, riot_id)
         if depart is None or final is None:
             points_lp = points_paliers = 0

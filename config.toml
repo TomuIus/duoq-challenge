@@ -64,3 +64,16 @@ joueurs = ["A_COMPLETER_4#TAG", "A_COMPLETER_5#TAG"]
 # equipe = "Équipe 1"
 # points = -20
 # motif = "partie jouée sans le coéquipier le 23/01"
+
+# --- Rangs de départ fixés à la main -------------------------------------------
+# À n'utiliser que si le rang de départ calculé automatiquement est faux
+# (par exemple si le premier relevé est arrivé après la 2e partie de placement).
+# palier : IRON, BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER,
+#          GRANDMASTER, CHALLENGER ; division : I, II, III ou IV (rien au-delà de Diamant).
+# Retirez les « # » devant les 5 lignes pour activer.
+
+# [[rangs_depart]]
+# joueur = "Tomulus#ÀCAB"
+# palier = "GOLD"
+# division = "IV"
+# lp = 0

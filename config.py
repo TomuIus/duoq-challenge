@@ -59,6 +59,19 @@ def verifier(config):
         if not isinstance(a.get("points"), int):
             problemes.append("[[ajustements]] : « points » doit être un nombre entier.")
 
+    joueurs = {j.lower() for e in config.get("equipes", []) for j in e.get("joueurs", [])}
+    for r in config.get("rangs_depart", []):
+        nom = r.get("joueur", "?")
+        if nom.lower() not in joueurs:
+            problemes.append(f"[[rangs_depart]] : joueur inconnu « {nom} ».")
+        if r.get("palier") not in PALIERS:
+            problemes.append(f"[[rangs_depart]] {nom} : palier invalide « {r.get('palier')} ».")
+        elif r["palier"] not in ("MASTER", "GRANDMASTER", "CHALLENGER") and \
+                r.get("division") not in ("I", "II", "III", "IV"):
+            problemes.append(f"[[rangs_depart]] {nom} : division invalide (I, II, III ou IV).")
+        if not isinstance(r.get("lp"), int) or r["lp"] < 0:
+            problemes.append(f"[[rangs_depart]] {nom} : « lp » doit être un entier positif ou nul.")
+
     return problemes
 
 
