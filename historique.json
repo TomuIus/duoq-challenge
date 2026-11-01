@@ -1,0 +1,19 @@
+{
+ "parties": {},
+ "puuids": {
+  "Tomulus#ÀCAB": "-8Q2AczK-Ervqe0lR3eyfzMHJBai0fVMUbat8Y0S6Ddk4fwX9XLQdXmgqNAIDN2JEj1t4hYHG8YLVA"
+ },
+ "releves": [
+  {
+   "heure": "2026-11-01T23:25:46+00:00",
+   "joueur": "Tomulus#ÀCAB",
+   "rang": {
+    "defaites": 52,
+    "division": "II",
+    "lp": 96,
+    "palier": "GOLD",
+    "victoires": 46
+   }
+  }
+ ]
+}
