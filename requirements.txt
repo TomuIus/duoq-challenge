@@ -1,1 +1,3 @@
 requests
+# Base des fuseaux horaires (Europe/Paris...) : Windows ne la fournit pas à Python.
+tzdata

@@ -4,5 +4,9 @@
 # Fichiers temporaires de Python
 __pycache__/
 
+# Historiques de test (créés avec --fichier), à ne pas publier
+historique-test*.json
+classement-test*.json
+
 # Au cas où : ne jamais envoyer de fichier contenant une clé
 .env

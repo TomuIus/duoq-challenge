@@ -54,3 +54,13 @@ joueurs = ["A_COMPLETER_2#TAG", "A_COMPLETER_3#TAG"]
 [[equipes]]
 nom = "Équipe 3"
 joueurs = ["A_COMPLETER_4#TAG", "A_COMPLETER_5#TAG"]
+
+# --- Ajustements manuels -----------------------------------------------------
+# Pénalités ou corrections décidées ensemble (partie sans le coéquipier,
+# score gelé à corriger...). Retirez le « # » devant les 4 lignes pour activer.
+# Le nom d'équipe doit être exactement celui défini plus haut.
+
+# [[ajustements]]
+# equipe = "Équipe 1"
+# points = -20
+# motif = "partie jouée sans le coéquipier le 23/01"

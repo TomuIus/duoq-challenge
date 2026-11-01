@@ -52,6 +52,13 @@ def verifier(config):
     if not config.get("equipes"):
         problemes.append("Aucune équipe définie.")
 
+    noms = {e.get("nom") for e in config.get("equipes", [])}
+    for a in config.get("ajustements", []):
+        if a.get("equipe") not in noms:
+            problemes.append(f"[[ajustements]] : équipe inconnue « {a.get('equipe')} ».")
+        if not isinstance(a.get("points"), int):
+            problemes.append("[[ajustements]] : « points » doit être un nombre entier.")
+
     return problemes
 
 
