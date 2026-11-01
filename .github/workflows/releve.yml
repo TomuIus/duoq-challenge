@@ -1,0 +1,81 @@
+# =============================================================================
+#  Relevé automatique et publication du site
+#  1. interroge l'API Riot (releve.py) et calcule le classement (classement.py) ;
+#  2. enregistre historique.json dans le dépôt, seulement s'il a changé ;
+#  3. publie la page (index.html + classement.json) sur GitHub Pages.
+# =============================================================================
+name: Relevé et publication
+
+on:
+  # Lancement à la main : onglet « Actions » du dépôt, puis « Run workflow ».
+  workflow_dispatch:
+
+  # Lancement automatique toutes les 10 minutes (minutes 7, 17, 27...).
+  # DÉSACTIVÉ pour l'instant : à activer juste avant le challenge, en retirant
+  # les « # » des deux lignes ci-dessous. (GitHub désactive de toute façon les
+  # lancements automatiques d'un dépôt resté 60 jours sans activité.)
+  # schedule:
+  #   - cron: "7-59/10 * * * *"
+
+# Droits accordés au workflow : écrire dans le dépôt (historique.json)
+# et publier sur GitHub Pages.
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Jamais deux relevés en même temps : le suivant attend la fin du précédent.
+concurrency:
+  group: releve
+  cancel-in-progress: false
+
+jobs:
+  releve:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - name: Récupérer le code du dépôt
+        uses: actions/checkout@v6
+
+      - name: Installer les dépendances Python
+        run: |
+          python3 --version
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet -r requirements.txt
+
+      - name: Relevé des rangs et des parties
+        env:
+          RIOT_API_KEY: ${{ secrets.RIOT_API_KEY }}   # le secret, jamais écrit dans le code
+        run: .venv/bin/python releve.py
+
+      - name: Calcul du classement
+        run: .venv/bin/python classement.py
+
+      - name: Enregistrer l'historique s'il a changé
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add historique.json
+          if git diff --cached --quiet; then
+            echo "Rien de nouveau : pas de commit."
+          else
+            git commit -m "Relevé automatique"
+            git pull --rebase   # au cas où quelqu'un a modifié le dépôt entre-temps
+            git push
+          fi
+
+      - name: Préparer les fichiers du site
+        run: |
+          mkdir _site
+          cp index.html classement.json _site/
+
+      - name: Envoyer le site à GitHub Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Publier le site
+        id: deploiement
+        uses: actions/deploy-pages@v4

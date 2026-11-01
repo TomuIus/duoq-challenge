@@ -56,7 +56,7 @@
     font: 1rem/1.5 var(--police);
     font-variant-numeric: tabular-nums;   /* chiffres de même largeur : colonnes alignées */
   }
-  main { max-width: 84rem; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+  main { max-width: 84rem; margin: 0 auto; padding: 2rem 1.5rem 3rem; position: relative; }
   h1, h2, h3 { line-height: 1.15; margin: 0; }
   a { color: inherit; }
   :focus-visible { outline: 3px solid var(--DIAMOND); outline-offset: 2px; }
@@ -66,10 +66,10 @@
   .entete p { margin: 0.35rem 0 0; color: var(--discret); }
   .entete .etat { color: var(--encre); font-weight: 600; }
 
-  .entete { display: grid; grid-template-columns: 1fr auto; gap: 0 1rem; align-items: start; }
-  .entete > :not(button) { grid-column: 1; }
+  /* En-tête, classement et pied de page sont centrés au-dessus des 3 fiches. */
+  .entete { text-align: center; max-width: 46rem; margin: 0 auto; }
   #theme {
-    grid-column: 2; grid-row: 1; margin-top: 0.5rem;
+    position: absolute; top: 1.5rem; right: 1.5rem;
     font: inherit; font-size: 0.875rem; color: var(--encre);
     background: var(--surface); border: 1px solid var(--filet); border-radius: 1rem;
     padding: 0.3rem 0.8rem; cursor: pointer;
@@ -79,7 +79,7 @@
   /* --- Classement : une ligne par équipe ------------------------------------
      La bande verticale à gauche montre le palier actuel des deux joueurs. */
   /* Le classement garde une largeur de lecture confortable, même sur grand écran. */
-  .classement { list-style: none; margin: 2rem 0 0; padding: 0; max-width: 46rem; }
+  .classement { list-style: none; margin: 2rem auto 0; padding: 0; max-width: 46rem; }
   .ligne {
     display: grid;
     grid-template-columns: 0.6rem 2.2rem 1fr auto;
@@ -154,11 +154,16 @@
   .parties .exclue { opacity: 0.6; }
 
   /* --- Pied de page --------------------------------------------------------- */
-  footer { max-width: 46rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--filet); color: var(--discret); font-size: 0.875rem; }
+  footer { max-width: 46rem; margin: 3rem auto 0; padding-top: 1rem; border-top: 1px solid var(--filet); color: var(--discret); font-size: 0.875rem; }
   footer h2 { font-size: 1rem; color: var(--encre); margin-bottom: 0.4rem; }
   footer ul { margin: 0 0 1rem; padding-left: 1.1rem; }
 
   .erreur { margin-top: 2rem; padding: 1rem; background: var(--surface); border-left: 4px solid var(--defaite); }
+
+  /* Écran étroit : le bouton de thème reprend sa place sous le titre. */
+  @media (max-width: 48rem) {
+    #theme { position: static; margin-top: 0.75rem; }
+  }
 
   @media (max-width: 30rem) {
     .ligne { grid-template-columns: 0.5rem 1.6rem 1fr auto; gap: 0 0.6rem; }
@@ -173,9 +178,9 @@
 <main>
   <header class="entete">
     <h1 id="titre">DuoQ Challenge</h1>
-    <button id="theme" type="button"></button>
     <p id="dates"></p>
     <p id="etat" class="etat"></p>
+    <button id="theme" type="button"></button>
   </header>
 
   <ol id="classement" class="classement" aria-label="Classement des équipes"></ol>

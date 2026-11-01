@@ -216,6 +216,11 @@ def main():
              else config["challenge"]["debut"])
     fin = config["challenge"]["fin"]
 
+    # Heure du dernier relevé : dans etat.json (écrit par releve.py), s'il existe.
+    fichier_etat = dossier / "etat.json"
+    dernier_releve = (json.loads(fichier_etat.read_text(encoding="utf-8"))["dernier_releve"]
+                      if fichier_etat.exists() else historique.get("dernier_releve"))
+
     equipes = [analyser_equipe(e, historique, config, debut, fin) for e in config["equipes"]]
 
     # Bonus de série : à chaque joueur de la (ou des) équipe(s) ayant la plus longue série.
@@ -228,7 +233,7 @@ def main():
     equipes.sort(key=lambda e: e["score"], reverse=True)
     resultat = {"challenge": config["challenge"]["nom"],
                 "calcule_le": datetime.now(PARIS).isoformat(timespec="seconds"),
-                "dernier_releve": historique.get("dernier_releve"),
+                "dernier_releve": dernier_releve,
                 "debut": debut.isoformat(), "fin": fin.isoformat(),
                 "record_serie": record,
                 # Rappel des règles, pour que la page les affiche sans lire config.toml.

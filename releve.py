@@ -15,6 +15,9 @@ Principe : on ne fait qu'AJOUTER à l'historique, on ne modifie jamais ce qui y 
                   depuis le relevé précédent (ou la première fois), avec l'heure.
   - « parties » : chaque partie Solo/Duo d'un joueur, enregistrée une seule fois.
 Le classement est calculé ailleurs (classement.py), à partir de ce fichier.
+
+L'heure du relevé est écrite à part, dans etat.json : ainsi historique.json ne
+change que s'il y a du nouveau, et GitHub Actions ne crée un commit que dans ce cas.
 """
 
 import argparse
@@ -33,7 +36,7 @@ def maintenant():
 def charger_historique(chemin):
     if chemin.exists():
         return json.loads(chemin.read_text(encoding="utf-8"))
-    return {"puuids": {}, "releves": [], "parties": {}, "dernier_releve": None}
+    return {"puuids": {}, "releves": [], "parties": {}}
 
 
 def enregistrer_historique(chemin, historique):
@@ -122,8 +125,10 @@ def main():
             historique["parties"][id_partie] = resumer_partie(partie, joueurs_suivis)
             nouvelles += 1
 
-    historique["dernier_releve"] = maintenant()
+    historique.pop("dernier_releve", None)  # ancien emplacement, désormais dans etat.json
     enregistrer_historique(chemin, historique)
+    etat = Path(__file__).parent / "etat.json"
+    etat.write_text(json.dumps({"dernier_releve": maintenant()}) + "\n", encoding="utf-8")
     print(f"{nouvelles} nouvelle(s) partie(s), {riot.nb_requetes} requête(s) envoyée(s). "
           f"Historique enregistré dans {chemin.name}.")
 

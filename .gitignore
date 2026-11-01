@@ -8,5 +8,9 @@ __pycache__/
 historique-test*.json
 classement-test*.json
 
+# Fichiers produits à chaque relevé : publiés sur le site, pas enregistrés dans Git
+classement.json
+etat.json
+
 # Au cas où : ne jamais envoyer de fichier contenant une clé
 .env
