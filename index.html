@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DuoQ Challenge</title>
+<script>
+  // Thème choisi précédemment avec le bouton (s'il y en a un), appliqué avant l'affichage.
+  try {
+    const t = localStorage.getItem("theme");
+    if (t === "clair" || t === "sombre") document.documentElement.dataset.theme = t;
+  } catch (e) { /* stockage indisponible : on suit simplement le système */ }
+</script>
 <style>
   /* --- Couleurs et texte ------------------------------------------------------
      Une interface neutre : la seule couleur vive vient des paliers des joueurs. */
@@ -25,6 +32,22 @@
     --police: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   }
 
+  /* --- Thème sombre ---------------------------------------------------------
+     Appliqué si le système est en mode sombre (sauf choix « clair » via le bouton),
+     ou si le bouton a forcé « sombre ». */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="clair"]) {
+      --fond: #12181f; --surface: #1b232c; --encre: #e6ebf0; --discret: #9aa6b2;
+      --filet: #2c3742; --victoire: #5cbf8a; --defaite: #e07a6e; --remake: #8f979f;
+      --AUCUN: #4a5560; color-scheme: dark;
+    }
+  }
+  :root[data-theme="sombre"] {
+    --fond: #12181f; --surface: #1b232c; --encre: #e6ebf0; --discret: #9aa6b2;
+    --filet: #2c3742; --victoire: #5cbf8a; --defaite: #e07a6e; --remake: #8f979f;
+    --AUCUN: #4a5560; color-scheme: dark;
+  }
+
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -42,6 +65,16 @@
   .entete h1 { font-size: clamp(2rem, 7vw, 2.8rem); font-weight: 800; letter-spacing: -0.02em; }
   .entete p { margin: 0.35rem 0 0; color: var(--discret); }
   .entete .etat { color: var(--encre); font-weight: 600; }
+
+  .entete { display: grid; grid-template-columns: 1fr auto; gap: 0 1rem; align-items: start; }
+  .entete > :not(button) { grid-column: 1; }
+  #theme {
+    grid-column: 2; grid-row: 1; margin-top: 0.5rem;
+    font: inherit; font-size: 0.875rem; color: var(--encre);
+    background: var(--surface); border: 1px solid var(--filet); border-radius: 1rem;
+    padding: 0.3rem 0.8rem; cursor: pointer;
+  }
+  #theme:hover { border-color: var(--discret); }
 
   /* --- Classement : une ligne par équipe ------------------------------------
      La bande verticale à gauche montre le palier actuel des deux joueurs. */
@@ -130,6 +163,7 @@
 <main>
   <header class="entete">
     <h1 id="titre">DuoQ Challenge</h1>
+    <button id="theme" type="button"></button>
     <p id="dates"></p>
     <p id="etat" class="etat"></p>
   </header>
@@ -293,6 +327,24 @@ function afficher(d) {
    `Parties classées uniquement avec son coéquipier.`]
     .forEach(t => regles.append(el("li", "", t)));
 }
+
+// Bouton clair / sombre. Le thème actuel est soit celui choisi avec le bouton,
+// soit celui du système. Le texte du bouton dit ce qui se passera au clic.
+const bouton = document.getElementById("theme");
+const systemeSombre = matchMedia("(prefers-color-scheme: dark)");
+const themeActuel = () => document.documentElement.dataset.theme
+  || (systemeSombre.matches ? "sombre" : "clair");
+const majBouton = () => {
+  bouton.textContent = themeActuel() === "sombre" ? "Passer en thème clair" : "Passer en thème sombre";
+};
+bouton.addEventListener("click", () => {
+  const nouveau = themeActuel() === "sombre" ? "clair" : "sombre";
+  document.documentElement.dataset.theme = nouveau;
+  try { localStorage.setItem("theme", nouveau); } catch (e) { /* choix non mémorisé */ }
+  majBouton();
+});
+systemeSombre.addEventListener("change", majBouton);
+majBouton();
 
 // Chargement des données. Pour tester un autre fichier : index.html?donnees=classement-test.json
 const fichier = new URLSearchParams(location.search).get("donnees") || "classement.json";
