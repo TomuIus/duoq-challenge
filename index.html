@@ -151,7 +151,26 @@
   .parties .Défaite { color: var(--defaite); font-weight: 700; }
   .parties .Remake { color: var(--remake); font-weight: 700; }
   .parties .signal { grid-column: 2 / -1; color: var(--defaite); font-size: 0.85rem; }
-  /* LP estimés de chaque joueur, sous le résultat */
+  /* Une ligne par joueur du duo : icône du champion, icône du poste, pseudo, LP */
+  .parties .duo { justify-self: end; font-weight: 700; font-size: 0.85rem; }
+  .parties .joueur-partie {
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 0.5rem;
+    margin-top: 0.35rem; font-size: 0.9rem; min-width: 0;
+  }
+  .parties .icone-champ { width: 28px; height: 28px; border-radius: 4px; flex: none; }
+  .parties .icone-poste { width: 18px; height: 18px; flex: none; }
+  .parties .abbr-poste {
+    flex: none; font-size: 0.7rem; font-weight: 700; padding: 0 0.3rem;
+    border: 1px solid var(--filet); border-radius: 0.3rem; color: var(--discret);
+  }
+  .parties .pseudo { font-weight: 600; }
+  .parties .nom-champ { color: var(--discret); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .parties .lp-joueur { margin-left: auto; white-space: nowrap; }
+  .parties .gain { color: var(--victoire); font-weight: 600; }
+  .parties .perte { color: var(--defaite); font-weight: 600; }
+  .parties .inconnu { font-weight: 700; cursor: help; text-decoration: underline dotted; }
+  .parties .groupe { cursor: help; text-decoration: underline dotted; color: var(--discret); font-size: 0.8rem; }
+  /* (ancien affichage des LP, conservé pour compatibilité) */
   .parties .lp { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 0 1rem; font-size: 0.85rem; color: var(--discret); }
   .parties .lp .gain { color: var(--victoire); font-weight: 600; }
   .parties .lp .perte { color: var(--defaite); font-weight: 600; }
@@ -236,28 +255,75 @@ function ilYa(iso) {
   return `dernier relevé le ${dateCourte(iso)}`;
 }
 
-// LP estimés d'une partie, pour chaque joueur présent.
+// --- Icônes (images officielles de Riot, chargées depuis leurs serveurs) -----------
+// Champions : Data Dragon (service officiel de Riot). Postes : Community Dragon
+// (fichiers du client, service communautaire). Si une image ne charge pas, on
+// affiche du texte à la place.
+let versionDD = null;   // version actuelle de Data Dragon, récupérée au chargement
+const POSTES = { TOP: "TOP", JUNGLE: "JGL", MIDDLE: "MID", BOTTOM: "ADC", UTILITY: "SUP" };
+const URL_POSTE = p => "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/" +
+  `global/default/assets/images/position-selector/positions/icon-position-${p.toLowerCase()}.png`;
+
+// Nom lisible d'un champion à partir de son nom interne (« MasterYi » → « Master Yi »).
+const nomChampion = c => ({ MonkeyKing: "Wukong" })[c] || c.replace(/([a-z])([A-Z])/g, "$1 $2");
+
+function iconeChampion(champion) {
+  if (!versionDD) return null;
+  const img = el("img", "icone-champ");
+  img.src = `https://ddragon.leagueoflegends.com/cdn/${versionDD}/img/champion/${champion}.png`;
+  img.alt = ""; img.loading = "lazy";
+  img.onerror = () => img.remove();           // le nom du champion reste affiché à côté
+  return img;
+}
+
+function iconePoste(poste) {
+  if (!poste || !POSTES[poste]) return null;
+  const abbr = el("span", "abbr-poste", POSTES[poste]);
+  const img = el("img", "icone-poste");
+  img.src = URL_POSTE(poste); img.alt = POSTES[poste]; img.title = POSTES[poste]; img.loading = "lazy";
+  img.onerror = () => img.replaceWith(abbr);  // repli : abréviation (TOP, JGL, MID, ADC, SUP)
+  return img;
+}
+
+// Texte des LP estimés d'un joueur pour une partie.
 // « ? » : plusieurs parties entre deux relevés, LP comptés dans le total d'une partie suivante.
-function lignesLP(lp) {
-  const zone = el("span", "lp");
-  Object.entries(lp || {}).forEach(([joueur, e]) => {
-    const bloc = el("span", "", `${joueur.split("#")[0]} `);
-    if (e.lp === null) {
-      const v = el("span", "inconnu", "?");
-      v.title = `Plusieurs parties (${e.parties}) se sont terminées entre deux relevés : ` +
-                "leurs LP sont comptés ensemble sur la dernière d'entre elles.";
-      bloc.append(v);
-    } else {
-      bloc.append(el("span", e.lp >= 0 ? "gain" : "perte", `${signe(e.lp)} LP`));
-      if (e.parties > 1) {
-        const g = el("span", "groupe", ` (sur ${e.parties} parties)`);
-        g.title = `Total des ${e.parties} dernières parties, terminées entre deux relevés.`;
-        bloc.append(g);
-      }
+function texteLP(e) {
+  const zone = el("span", "lp-joueur");
+  if (!e) return zone;                         // pas encore de relevé après la partie
+  if (e.lp === null) {
+    const v = el("span", "inconnu", "? LP");
+    v.title = `Plusieurs parties (${e.parties}) se sont terminées entre deux relevés : ` +
+              "leurs LP sont comptés ensemble sur la dernière d'entre elles.";
+    zone.append(v);
+  } else {
+    zone.append(el("span", e.lp >= 0 ? "gain" : "perte", `${signe(e.lp)} LP`));
+    if (e.parties > 1) {
+      const g = el("span", "groupe", ` (sur ${e.parties} parties)`);
+      g.title = `Total des ${e.parties} dernières parties, terminées entre deux relevés.`;
+      zone.append(g);
     }
-    zone.append(bloc);
-  });
+  }
   return zone;
+}
+
+// Une ligne par joueur de l'équipe présent dans la partie.
+function lignesJoueurs(partie) {
+  return Object.entries(partie.joueurs || {}).map(([joueur, info]) => {
+    const ligne = el("span", "joueur-partie");
+    [iconeChampion(info.champion), iconePoste(info.poste)].forEach(x => x && ligne.append(x));
+    ligne.append(el("span", "pseudo", joueur.split("#")[0]),
+                 el("span", "nom-champ", nomChampion(info.champion)),
+                 texteLP((partie.lp || {})[joueur]));
+    return ligne;
+  });
+}
+
+// Total des LP du duo pour la partie, si les LP de chaque joueur sont connus.
+function totalDuo(partie) {
+  const valeurs = Object.keys(partie.joueurs || {}).map(j => (partie.lp || {})[j]);
+  if (valeurs.length < 2 || valeurs.some(v => !v || v.lp === null)) return null;
+  const total = valeurs.reduce((s, v) => s + v.lp, 0);
+  return el("span", `duo ${total >= 0 ? "gain" : "perte"}`, `Duo ${signe(total)} LP`);
 }
 
 function pastille(palier, texte) {
@@ -359,8 +425,8 @@ function afficher(d) {
       const li = el("li", classes.join(" "));
       li.append(el("span", "date", datePartie(p.date)),
                 el("span", p.resultat, p.resultat),
-                el("span", "champ", Object.values(p.champions).join(" et ")));
-      li.append(lignesLP(p.lp));
+                totalDuo(p) || el("span"));
+      li.append(...lignesJoueurs(p));
       p.signalements.forEach(t => li.append(el("span", "signal", t)));
       ul.append(li);
     });
@@ -401,7 +467,11 @@ majBouton();
 
 // Chargement des données. Pour tester un autre fichier : index.html?donnees=classement-test.json
 const fichier = new URLSearchParams(location.search).get("donnees") || "classement.json";
-fetch(fichier, { cache: "no-store" })
+fetch("https://ddragon.leagueoflegends.com/api/versions.json")
+  .then(r => r.ok ? r.json() : [])
+  .then(v => { versionDD = v[0] || null; })
+  .catch(() => { /* pas d'icônes de champion : seuls les noms s'afficheront */ })
+  .then(() => fetch(fichier, { cache: "no-store" }))
   .then(r => { if (!r.ok) throw new Error(`fichier ${fichier} introuvable (${r.status})`); return r.json(); })
   .then(afficher)
   .catch(err => {

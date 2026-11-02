@@ -176,7 +176,9 @@ def analyser_equipe(equipe, historique, config, debut, fin):
         un_joueur = next(iter(presents.values()))
         debut_partie = datetime.fromtimestamp(p["debut_ms"] / 1000, PARIS)
         ligne = {"date": debut_partie.isoformat(timespec="minutes"),
-                 "champions": {j: d["champion"] for j, d in presents.items()},
+                 # Champion et poste de chaque joueur de l'équipe présent dans la partie.
+                 "joueurs": {j: {"champion": d["champion"], "poste": d.get("poste", "")}
+                             for j, d in presents.items()},
                  "signalements": []}
 
         if any(d["remake"] for d in presents.values()):

@@ -68,6 +68,8 @@ def resumer_partie(partie, joueurs_suivis):
                 # Critère vérifié sur un exemple (à revoir) : voir decisions.md.
                 "remake": p.get("gameEndedInEarlySurrender", False),
                 "champion": p["championName"],
+                # Poste joué (TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY) ; vide si inconnu.
+                "poste": p.get("teamPosition") or p.get("individualPosition") or "",
             }
     return {"debut_ms": debut, "fin_ms": fin, "duree_s": info["gameDuration"],
             "file": info["queueId"], "joueurs": participants}
