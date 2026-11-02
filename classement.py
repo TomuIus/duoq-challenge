@@ -113,6 +113,48 @@ def rang_final(releves, partie_exclue, alertes, riot_id):
     return avant[-1][1]
 
 
+# --- LP de chaque partie (estimation) --------------------------------------------
+
+def lp_par_partie(historique, riot_id):
+    """Estime les LP gagnés ou perdus par un joueur à chaque partie.
+
+    Principe : on parcourt dans l'ordre chronologique les fins de parties et les
+    changements de rang. Les parties terminées s'accumulent « en attente » ; au
+    changement de rang suivant, l'écart de LP leur est attribué :
+      - une seule partie en attente : elle reçoit l'écart ;
+      - plusieurs : la dernière reçoit le total (« sur N parties »),
+        les autres reçoivent « ? ».
+    Une partie dont les LP ne bougent pas tout de suite (mise à jour tardive chez
+    Riot) reste en attente jusqu'au changement suivant, au lieu d'être perdue.
+    Renvoie {id_partie: {"lp": nombre ou None, "parties": N}}.
+    """
+    evenements = []
+    for id_partie, p in historique["parties"].items():
+        d = p["joueurs"].get(riot_id)
+        if d and not d["remake"]:  # un remake ne change pas les LP
+            evenements.append((p["fin_ms"] / 1000, 0, id_partie))
+    for heure, rang in releves_du_joueur(historique, riot_id):
+        evenements.append((heure.timestamp(), 1, rang))
+    evenements.sort(key=lambda e: (e[0], e[1]))  # à heure égale : la partie d'abord
+
+    resultat, en_attente, precedent = {}, [], None
+    for _, sorte, valeur in evenements:
+        if sorte == 0:
+            en_attente.append(valeur)
+            continue
+        rang = valeur
+        if rang is not None and precedent is not None and en_attente:
+            ecart = lp_absolus(rang) - lp_absolus(precedent)
+            for id_partie in en_attente[:-1]:
+                resultat[id_partie] = {"lp": None, "parties": len(en_attente)}
+            resultat[en_attente[-1]] = {"lp": ecart, "parties": len(en_attente)}
+        if rang is not None:
+            # Premier rang connu (placement) : les parties d'avant n'ont pas de LP.
+            en_attente = []
+        precedent = rang
+    return resultat
+
+
 # --- Calcul pour une équipe -------------------------------------------------------
 
 def analyser_equipe(equipe, historique, config, debut, fin):
@@ -122,13 +164,14 @@ def analyser_equipe(equipe, historique, config, debut, fin):
 
     # Parties de l'équipe (au moins un des deux joueurs), dans l'ordre chronologique.
     parties = sorted(
-        (p for p in historique["parties"].values()
+        ((id_partie, p) for id_partie, p in historique["parties"].items()
          if p["debut_ms"] >= debut.timestamp() * 1000
          and any(j in p["joueurs"] for j in joueurs)),
-        key=lambda p: p["debut_ms"])
+        key=lambda ip: ip[1]["debut_ms"])
+    estimations = {j: lp_par_partie(historique, j) for j in joueurs}
 
     comptees, partie_exclue = [], None
-    for p in parties:
+    for id_partie, p in parties:
         presents = {j: p["joueurs"][j] for j in joueurs if j in p["joueurs"]}
         un_joueur = next(iter(presents.values()))
         debut_partie = datetime.fromtimestamp(p["debut_ms"] / 1000, PARIS)
@@ -141,6 +184,9 @@ def analyser_equipe(equipe, historique, config, debut, fin):
             liste.append(ligne)
             continue  # un remake ne compte pour rien
         ligne["resultat"] = "Victoire" if un_joueur["victoire"] else "Défaite"
+        # LP estimés de chaque joueur présent (absents si pas encore de relevé après).
+        ligne["lp"] = {j: estimations[j][id_partie] for j in presents
+                       if id_partie in estimations[j]}
 
         # Règle du duo : les deux joueurs doivent être dans la partie, dans le même camp.
         if len(presents) < 2 or len({d["camp"] for d in presents.values()}) > 1:

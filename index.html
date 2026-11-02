@@ -151,6 +151,12 @@
   .parties .Défaite { color: var(--defaite); font-weight: 700; }
   .parties .Remake { color: var(--remake); font-weight: 700; }
   .parties .signal { grid-column: 2 / -1; color: var(--defaite); font-size: 0.85rem; }
+  /* LP estimés de chaque joueur, sous le résultat */
+  .parties .lp { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 0 1rem; font-size: 0.85rem; color: var(--discret); }
+  .parties .lp .gain { color: var(--victoire); font-weight: 600; }
+  .parties .lp .perte { color: var(--defaite); font-weight: 600; }
+  .parties .lp .inconnu { font-weight: 700; cursor: help; text-decoration: underline dotted; }
+  .parties .lp .groupe { cursor: help; text-decoration: underline dotted; }
   .parties .exclue { opacity: 0.6; }
 
   /* --- Pied de page --------------------------------------------------------- */
@@ -170,7 +176,7 @@
     .score { font-size: 1.5rem; }
     .parties li { grid-template-columns: 8.2rem 1fr; }
     .parties .champ { grid-column: 2; }
-    .parties .signal { grid-column: 2; }
+    .parties .signal, .parties .lp { grid-column: 2; }
   }
 </style>
 </head>
@@ -223,6 +229,30 @@ function ilYa(iso) {
   if (minutes < 1) return "dernier relevé à l'instant";
   if (minutes < 60) return `dernier relevé il y a ${minutes} min`;
   return `dernier relevé le ${dateCourte(iso)}`;
+}
+
+// LP estimés d'une partie, pour chaque joueur présent.
+// « ? » : plusieurs parties entre deux relevés, LP comptés dans le total d'une partie suivante.
+function lignesLP(lp) {
+  const zone = el("span", "lp");
+  Object.entries(lp || {}).forEach(([joueur, e]) => {
+    const bloc = el("span", "", `${joueur.split("#")[0]} `);
+    if (e.lp === null) {
+      const v = el("span", "inconnu", "?");
+      v.title = `Plusieurs parties (${e.parties}) se sont terminées entre deux relevés : ` +
+                "leurs LP sont comptés ensemble sur la dernière d'entre elles.";
+      bloc.append(v);
+    } else {
+      bloc.append(el("span", e.lp >= 0 ? "gain" : "perte", `${signe(e.lp)} LP`));
+      if (e.parties > 1) {
+        const g = el("span", "groupe", ` (sur ${e.parties} parties)`);
+        g.title = `Total des ${e.parties} dernières parties, terminées entre deux relevés.`;
+        bloc.append(g);
+      }
+    }
+    zone.append(bloc);
+  });
+  return zone;
 }
 
 function pastille(palier, texte) {
@@ -323,6 +353,7 @@ function afficher(d) {
       li.append(el("span", "date", datePartie(p.date)),
                 el("span", p.resultat, p.resultat),
                 el("span", "champ", Object.values(p.champions).join(" et ")));
+      li.append(lignesLP(p.lp));
       p.signalements.forEach(t => li.append(el("span", "signal", t)));
       ul.append(li);
     });
