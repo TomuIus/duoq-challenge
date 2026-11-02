@@ -41,19 +41,18 @@ CHALLENGER  = 90   # idem
 
 # --- Équipes -----------------------------------------------------------------
 # Riot ID exact de chaque joueur (Pseudo#TAG). Les noms d'équipe sont libres.
-# À COMPLÉTER : coéquipiers et autres équipes (avec l'accord de chacun).
 
 [[equipes]]
 nom = "Équipe 1"
-joueurs = ["Tomulus#ÀCAB", "A_COMPLETER_1#TAG"]
+joueurs = ["WifeBuffed#WIF", "WillOfortune#5090"]
 
 [[equipes]]
 nom = "Équipe 2"
-joueurs = ["A_COMPLETER_2#TAG", "A_COMPLETER_3#TAG"]
+joueurs = ["Tomulus#ÀCAB", "Navybloo#EUW"]
 
 [[equipes]]
 nom = "Équipe 3"
-joueurs = ["A_COMPLETER_4#TAG", "A_COMPLETER_5#TAG"]
+joueurs = ["JesuisVEXée#6858", "Heltrik#Htrik"]
 
 # --- Ajustements manuels -----------------------------------------------------
 # Pénalités ou corrections décidées ensemble (partie sans le coéquipier,
