@@ -1,7 +1,12 @@
 {
  "parties": {},
  "puuids": {
-  "Tomulus#ÀCAB": "-8Q2AczK-Ervqe0lR3eyfzMHJBai0fVMUbat8Y0S6Ddk4fwX9XLQdXmgqNAIDN2JEj1t4hYHG8YLVA"
+  "Heltrik#Htrik": "6r48gcbj1VWVX3qj70a0FVFtHNKqX5EBVDYlyfvzcsKLNOIPDDwKrV5fWlCs0dcifkU49bu7WBh44g",
+  "JesuisVEXée#6858": "wHAdG0XpdGhFWSfYq06Z0G6cEZC8ORp1aHNZZUDFX03SaoEzkiDN0_ONh9O-6Bw6-U2wIUE6-Y17GQ",
+  "Navybloo#EUW": "wHnE8KLk0gjHqvjJNHsbo9OxtNegeYxSi38l11RjApITtWL9kcH6O2t6wUEzF2yoAZsJ4PERDmum6g",
+  "Tomulus#ÀCAB": "-8Q2AczK-Ervqe0lR3eyfzMHJBai0fVMUbat8Y0S6Ddk4fwX9XLQdXmgqNAIDN2JEj1t4hYHG8YLVA",
+  "WifeBuffed#WIF": "4CpqYz6G9IW_ny8s2FUYXPDYkq_T6HTMXaLsCyorfaCqCqEfkQ3Zrl5BaboJlzkhK7y7Y0LhpfC1RA",
+  "WillOfortune#5090": "x2VkxahgW9eURSX84jX6GHRJFAJkXEyJ6flM5xKQXkHFZ9aoc9k7DhSS4wutnMNvMptS_iC3dv7WbA"
  },
  "releves": [
   {
@@ -13,6 +18,61 @@
     "lp": 96,
     "palier": "GOLD",
     "victoires": 46
+   }
+  },
+  {
+   "heure": "2026-11-02T08:23:23+00:00",
+   "joueur": "WifeBuffed#WIF",
+   "rang": {
+    "defaites": 52,
+    "division": "IV",
+    "lp": 0,
+    "palier": "EMERALD",
+    "victoires": 56
+   }
+  },
+  {
+   "heure": "2026-11-02T08:23:23+00:00",
+   "joueur": "WillOfortune#5090",
+   "rang": {
+    "defaites": 141,
+    "division": "IV",
+    "lp": 88,
+    "palier": "EMERALD",
+    "victoires": 155
+   }
+  },
+  {
+   "heure": "2026-11-02T08:23:24+00:00",
+   "joueur": "Navybloo#EUW",
+   "rang": {
+    "defaites": 27,
+    "division": "IV",
+    "lp": 23,
+    "palier": "PLATINUM",
+    "victoires": 39
+   }
+  },
+  {
+   "heure": "2026-11-02T08:23:24+00:00",
+   "joueur": "JesuisVEXée#6858",
+   "rang": {
+    "defaites": 82,
+    "division": "II",
+    "lp": 55,
+    "palier": "BRONZE",
+    "victoires": 71
+   }
+  },
+  {
+   "heure": "2026-11-02T08:23:24+00:00",
+   "joueur": "Heltrik#Htrik",
+   "rang": {
+    "defaites": 38,
+    "division": "II",
+    "lp": 37,
+    "palier": "SILVER",
+    "victoires": 17
    }
   }
  ]
