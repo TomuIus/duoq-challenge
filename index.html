@@ -158,6 +158,11 @@
   .parties .lp .inconnu { font-weight: 700; cursor: help; text-decoration: underline dotted; }
   .parties .lp .groupe { cursor: help; text-decoration: underline dotted; }
   .parties .exclue { opacity: 0.6; }
+  /* Fond teinté selon le résultat : les séries se voient d'un coup d'œil. */
+  .parties li { padding: 0.45rem 0.6rem; border-top: 0; border-radius: 0.35rem; margin-bottom: 3px; }
+  .parties li.res-victoire { background: color-mix(in srgb, var(--victoire) 12%, transparent); }
+  .parties li.res-defaite { background: color-mix(in srgb, var(--defaite) 12%, transparent); }
+  .parties li.res-remake { background: color-mix(in srgb, var(--remake) 10%, transparent); }
 
   /* --- Pied de page --------------------------------------------------------- */
   footer { max-width: 46rem; margin: 3rem auto 0; padding-top: 1rem; border-top: 1px solid var(--filet); color: var(--discret); font-size: 0.875rem; }
@@ -349,7 +354,9 @@ function afficher(d) {
     det.append(el("summary", "", `Parties (${e.parties.length})`));
     const ul = el("ul", "parties");
     [...e.parties].reverse().forEach(p => {          // les plus récentes en premier
-      const li = el("li", p.comptee || p.resultat === "Remake" ? "" : "exclue");
+      const classes = [`res-${p.resultat === "Victoire" ? "victoire" : p.resultat === "Défaite" ? "defaite" : "remake"}`];
+      if (!p.comptee && p.resultat !== "Remake") classes.push("exclue");
+      const li = el("li", classes.join(" "));
       li.append(el("span", "date", datePartie(p.date)),
                 el("span", p.resultat, p.resultat),
                 el("span", "champ", Object.values(p.champions).join(" et ")));
