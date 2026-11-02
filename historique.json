@@ -74,6 +74,17 @@
     "palier": "SILVER",
     "victoires": 17
    }
+  },
+  {
+   "heure": "2026-11-02T09:44:49+00:00",
+   "joueur": "Tomulus#ÀCAB",
+   "rang": {
+    "defaites": 52,
+    "division": "I",
+    "lp": 17,
+    "palier": "GOLD",
+    "victoires": 47
+   }
   }
  ]
 }
