@@ -295,6 +295,8 @@ def main():
                 "regles": {"parties_max": config["challenge"]["parties_max"],
                            "serie_par_joueur": config["bonus"]["serie_par_joueur"],
                            "paliers": config["bonus"]["paliers"]},
+                # Favoris : simple décoration, recopiés tels quels pour la page.
+                "favoris": config.get("favoris", {}),
                 "equipes": equipes}
     (dossier / args.sortie).write_text(
         json.dumps(resultat, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

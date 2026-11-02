@@ -54,6 +54,18 @@ joueurs = ["Tomulus#ÀCAB", "Navybloo#EUW"]
 nom = "Équipe 3"
 joueurs = ["JesuisVEXée#6858", "Heltrik#Htrik"]
 
+# --- Champions favoris (décoration uniquement) -------------------------------
+# Affichés en petites icônes devant le pseudo de chaque joueur. Aucun effet sur
+# les scores. Noms internes de Riot, sans espace ni apostrophe (ex. MissFortune).
+
+[favoris]
+"WifeBuffed#WIF"    = ["Gangplank"]
+"WillOfortune#5090" = ["Thresh"]
+"Tomulus#ÀCAB"      = ["Lillia", "Viego"]
+"Navybloo#EUW"      = ["MissFortune", "Samira"]
+"JesuisVEXée#6858"  = ["MissFortune", "Seraphine"]
+"Heltrik#Htrik"     = ["Ziggs", "Leona"]
+
 # --- Ajustements manuels -----------------------------------------------------
 # Pénalités ou corrections décidées ensemble (partie sans le coéquipier,
 # score gelé à corriger...). Retirez le « # » devant les 4 lignes pour activer.

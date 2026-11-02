@@ -72,6 +72,12 @@ def verifier(config):
         if not isinstance(r.get("lp"), int) or r["lp"] < 0:
             problemes.append(f"[[rangs_depart]] {nom} : « lp » doit être un entier positif ou nul.")
 
+    for nom, champions in config.get("favoris", {}).items():
+        if nom.lower() not in joueurs:
+            problemes.append(f"[favoris] : joueur inconnu « {nom} ».")
+        if not isinstance(champions, list) or not all(isinstance(x, str) for x in champions):
+            problemes.append(f"[favoris] {nom} : il faut une liste de noms, ex. [\"Lillia\"].")
+
     return problemes
 
 

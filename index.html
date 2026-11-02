@@ -121,7 +121,10 @@
     display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 1rem;
     padding: 0.75rem 0; border-top: 1px solid var(--filet);
   }
-  .joueur .id { font-weight: 600; overflow-wrap: anywhere; }
+  .joueur .id { font-weight: 600; overflow-wrap: anywhere; display: flex; align-items: center; gap: 0.35rem; }
+  /* Champions favoris : petites icônes rondes devant le pseudo (décoration) */
+  .favori { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--filet); flex: none; }
+  .favoris { display: inline-flex; gap: 0.2rem; margin-right: 0.15rem; }
   .joueur .pts { text-align: right; font-weight: 700; }
   .joueur .rangs { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; font-size: 0.9rem; }
   .palier {
@@ -285,6 +288,21 @@ function iconePoste(poste) {
   return img;
 }
 
+// Icônes rondes des champions favoris d'un joueur (décoration, depuis config.toml).
+function favorisDe(favoris, joueur) {
+  const liste = (favoris || {})[joueur];
+  if (!versionDD || !liste || !liste.length) return null;
+  const zone = el("span", "favoris");
+  liste.forEach(champion => {
+    const img = el("img", "favori");
+    img.src = `https://ddragon.leagueoflegends.com/cdn/${versionDD}/img/champion/${champion}.png`;
+    img.alt = nomChampion(champion); img.title = `Favori : ${nomChampion(champion)}`;
+    img.onerror = () => img.remove();
+    zone.append(img);
+  });
+  return zone;
+}
+
 // Texte des LP estimés d'un joueur pour une partie.
 // « ? » : plusieurs parties entre deux relevés, LP comptés dans le total d'une partie suivante.
 function texteLP(e) {
@@ -387,7 +405,11 @@ function afficher(d) {
     e.joueurs.forEach(j => {
       const b = el("div", "joueur");
       const pts = j.points_lp + j.bonus_paliers;
-      b.append(el("span", "id", j.joueur), el("span", "pts", `${signe(pts)} pts`));
+      const id = el("span", "id");
+      const fav = favorisDe(d.favoris, j.joueur);
+      if (fav) id.append(fav);
+      id.append(j.joueur);
+      b.append(id, el("span", "pts", `${signe(pts)} pts`));
       const rangs = el("span", "rangs");
       rangs.append(pastille(j.palier_depart, j.rang_depart), el("span", "", "→"),
                    pastille(j.palier_actuel, j.rang_actuel));
