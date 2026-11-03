@@ -54,9 +54,15 @@ joueurs = ["Tomulus#ÀCAB", "Navybloo#EUW"]
 nom = "Équipe 3"
 joueurs = ["JesuisVEXée#6858", "Heltrik#Htrik"]
 
-# --- Champions favoris (décoration uniquement) -------------------------------
-# Affichés en petites icônes devant le pseudo de chaque joueur. Aucun effet sur
-# les scores. Noms internes de Riot, sans espace ni apostrophe (ex. MissFortune).
+# --- Icônes de champions devant le pseudo (décoration uniquement) -----------
+# Aucun effet sur les scores. Un champion joué au moins « champions_seuil » fois
+# pendant le challenge (remakes exclus) remplace un favori ; au plus
+# « champions_max » icônes par joueur. Les places restantes vont aux favoris.
+# Noms internes de Riot, sans espace ni apostrophe (ex. MissFortune).
+
+[affichage]
+champions_seuil = 3   # à revoir après des tests
+champions_max   = 2
 
 [favoris]
 "WifeBuffed#WIF"    = ["Gangplank"]

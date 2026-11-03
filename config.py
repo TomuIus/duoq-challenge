@@ -78,6 +78,11 @@ def verifier(config):
         if not isinstance(champions, list) or not all(isinstance(x, str) for x in champions):
             problemes.append(f"[favoris] {nom} : il faut une liste de noms, ex. [\"Lillia\"].")
 
+    for cle in ("champions_seuil", "champions_max"):
+        valeur = config.get("affichage", {}).get(cle, 1)
+        if not isinstance(valeur, int) or isinstance(valeur, bool) or valeur < 1:
+            problemes.append(f"[affichage] : « {cle} » doit être un entier supérieur ou égal à 1.")
+
     return problemes
 
 

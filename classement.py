@@ -157,6 +157,38 @@ def lp_par_partie(historique, riot_id):
 
 # --- Calcul pour une équipe -------------------------------------------------------
 
+def icones_du_joueur(riot_id, comptees, config):
+    """Champions à afficher devant le pseudo (décoration, sans effet sur les scores).
+
+    Un champion joué au moins « seuil » fois pendant le challenge (parties comptées,
+    remakes exclus) prend la place d'un favori, dans la limite de « max » icônes.
+    À égalité de parties, le champion joué le plus récemment passe devant.
+    Les places restantes sont prises par les favoris de config.toml.
+    """
+    reglages = config.get("affichage", {})
+    seuil = reglages.get("champions_seuil", 3)
+    maximum = reglages.get("champions_max", 2)
+
+    nombre, derniere = Counter(), {}
+    for p in comptees:
+        d = p["joueurs"].get(riot_id)
+        if d:
+            nombre[d["champion"]] += 1
+            derniere[d["champion"]] = max(derniere.get(d["champion"], 0), p["debut_ms"])
+    joues = sorted((c for c, n in nombre.items() if n >= seuil),
+                   key=lambda c: (nombre[c], derniere[c]), reverse=True)[:maximum]
+
+    icones = [{"champion": c, "parties": nombre[c]} for c in joues]
+    favoris = next((v for k, v in config.get("favoris", {}).items()
+                    if k.lower() == riot_id.lower()), [])
+    for c in favoris:
+        if len(icones) >= maximum:
+            break
+        if c not in joues:
+            icones.append({"champion": c, "parties": None})  # None = favori
+    return icones
+
+
 def analyser_equipe(equipe, historique, config, debut, fin):
     joueurs = equipe["joueurs"]
     parties_max = config["challenge"]["parties_max"]
@@ -243,7 +275,8 @@ def analyser_equipe(equipe, historique, config, debut, fin):
                         "rang_actuel": texte_rang(final),
                         "palier_depart": depart["palier"] if depart else None,
                         "palier_actuel": final["palier"] if final else None,
-                        "points_lp": points_lp, "bonus_paliers": points_paliers})
+                        "points_lp": points_lp, "bonus_paliers": points_paliers,
+                        "icones": icones_du_joueur(riot_id, comptees, config)})
 
     # Ajustements manuels saisis dans config.toml (pénalités, corrections).
     ajustements = [a for a in config.get("ajustements", []) if a["equipe"] == equipe["nom"]]
@@ -295,8 +328,6 @@ def main():
                 "regles": {"parties_max": config["challenge"]["parties_max"],
                            "serie_par_joueur": config["bonus"]["serie_par_joueur"],
                            "paliers": config["bonus"]["paliers"]},
-                # Favoris : simple décoration, recopiés tels quels pour la page.
-                "favoris": config.get("favoris", {}),
                 "equipes": equipes}
     (dossier / args.sortie).write_text(
         json.dumps(resultat, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
